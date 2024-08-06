@@ -1,19 +1,23 @@
 from flask import Flask, jsonify, abort, make_response, request
-
+import time
+from apscheduler.schedulers.background import BackgroundScheduler
 app = Flask(__name__)
+scheduler = BackgroundScheduler()
 
 lsensors = [
     {
         'id': 1,
         'description': u'first',
         'val': -1,
-        'alarm': -1
+        'alarm': -1,
+        'timestamp': time.time()
     },
     {
         'id': 2,
         'description': u'second _ sensor',
         'val': -1,
-        'alarm': -1
+        'alarm': -1,
+        'timestamp': time.time()
     }
 ]
 #curl -i http://localhost:5000/alyarma/api/v1.0/sensors
@@ -38,7 +42,8 @@ def create_sensor():
         'id': lsensors[-1]['id'] + 1,
         'description': request.json.get('description', ""),
         'val': -1,
-        'alarm': -1
+        'alarm': -1,
+        'timestamp': time.time()
     }
     lsensors.append(sensor)
     return jsonify({'sensor': sensor}), 201
@@ -61,6 +66,7 @@ def update_sensor(sensor_id):
     sensor[0]['description'] = request.json.get('description', sensor[0]['description'])
     sensor[0]['val'] = request.json.get('val', sensor[0]['val'])
     sensor[0]['alarm'] = request.json.get('alarm', sensor[0]['alarm'])
+    sensor[0]['timestamp'] = time.time()
     return jsonify({'sensor': sensor[0]})
 
 @app.route('/alyarma/api/v1.0/sensors/<int:sensor_id>', methods=['DELETE'])
@@ -75,5 +81,11 @@ def delete_sensor(sensor_id):
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
+def task():
+    print(time.time())
+
+scheduler.add_job(task, 'interval', seconds=30)
+scheduler.start()
+
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
+    app.run(host="0.0.0.0", use_reloader=False)
