@@ -9,14 +9,14 @@ scheduler = BackgroundScheduler()
 lsensors = [
     {
         'id': 1,
-        'description': u'first',
+        'description': u'это будет датчика дыма',
         'val': -1,
         'alarm': -1,
         'timestamp': time.time()
     },
     {
         'id': 2,
-        'description': u'second _ sensor',
+        'description': u'это будет ик сенсор огня',
         'val': -1,
         'alarm': -1,
         'timestamp': time.time()
@@ -92,15 +92,23 @@ def task():
     for sen in jsensors:
         print(sen['alarm'])
         if sen['alarm'] == 1:
-            msg = urllib.parse.quote_plus("горюююю")
+            msg = urllib.parse.quote_plus(str(sen['description']) + " прислал оповещение о пожаре")
+            urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
+        if sen['alarm'] == 0:
+            msg = urllib.parse.quote_plus(str(sen['description']) + " прислал оповещение о том что не отвечает")
             urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
         timeshrimp = time.time() - sen['timestamp']
         print(timeshrimp)
         if timeshrimp >= 30:
-            msg = urllib.parse.quote_plus("датчика здохла")
+            msg = urllib.parse.quote_plus(str(sen['description']) + " не отвечает " + str(timeshrimp) + " секунд")
             urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
 
+def taski():
+    msg = urllib.parse.quote_plus("связь есть")
+    urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
+
 scheduler.add_job(task, 'interval', seconds=10)
+scheduler.add_job(taski, 'interval', seconds=60)
 scheduler.start()
 
 
