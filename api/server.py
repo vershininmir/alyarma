@@ -85,14 +85,19 @@ def not_found(error):
 
 def task():
     print(time.time())
-    msg = urllib.parse.quote_plus("test")
-    urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
+    #msg = urllib.parse.quote_plus("test")
+    #urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
     jsensors = list(lsensors)
     print(len(jsensors))
-    for sen in jsensors:s
+    for sen in jsensors:
         print(sen['alarm'])
         if sen['alarm'] == 1:
             msg = urllib.parse.quote_plus("горюююю")
+            urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
+        timeshrimp = time.time() - sen['timestamp']
+        print(timeshrimp)
+        if timeshrimp >= 30:
+            msg = urllib.parse.quote_plus("датчика здохла")
             urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
 
 scheduler.add_job(task, 'interval', seconds=10)
@@ -101,4 +106,4 @@ scheduler.start()
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", use_reloader=False)
+    app.run(host="0.0.0.0", use_reloader=False)
