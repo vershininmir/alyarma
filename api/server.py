@@ -94,21 +94,20 @@ def task():
         if sen['alarm'] == 1:
             msg = urllib.parse.quote_plus(str(sen['description']) + " прислал оповещение о пожаре")
             urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
+        timeshrimp = time.time() - sen['timestamp']
+        print(timeshrimp)
         if sen['alarm'] == 0:
-            msg = urllib.parse.quote_plus(str(sen['description']) + " прислал оповещение о том что не отвечает")
+            msg = urllib.parse.quote_plus("нет данных с " str(sen['description']) + "(" + str(timeshrimp) + " секунд")
             urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
         timeshrimp = time.time() - sen['timestamp']
         print(timeshrimp)
         if timeshrimp >= 30:
-            msg = urllib.parse.quote_plus(str(sen['description']) + " не отвечает " + str(timeshrimp) + " секунд")
+            msg = urllib.parse.quote_plus(str(sen['description']) + " не присылает данных " + str(timeshrimp) + " секунд")
             urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
 
-def taski():
-    msg = urllib.parse.quote_plus("связь есть")
-    urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
+
 
 scheduler.add_job(task, 'interval', seconds=10)
-scheduler.add_job(taski, 'interval', seconds=60)
 scheduler.start()
 
 
