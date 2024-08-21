@@ -6,6 +6,9 @@ import json
 app = Flask(__name__)
 scheduler = BackgroundScheduler()
 
+def tg(tgmsg):
+    urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={tgmsg}")
+
 lsensors = [
     {
         'id': 1,
@@ -83,27 +86,28 @@ def delete_sensor(sensor_id):
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
+nocon = False
 def task():
-    print(time.time())
-    #msg = urllib.parse.quote_plus("test")
-    #urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
+    global nocon
     jsensors = list(lsensors)
-    print(len(jsensors))
     for sen in jsensors:
-        print(sen['alarm'])
         if sen['alarm'] == 1:
-            msg = urllib.parse.quote_plus(str(sen['description']) + " прислал оповещение о пожаре")
-            urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
+            msg = urllib.parse.quote_plus("ПОЖАР! '" + str(sen['description']) + "' прислал оповещение")
+            tg(msg)
         timeshrimp = time.time() - sen['timestamp']
-        print(timeshrimp)
         if sen['alarm'] == 0:
-            msg = urllib.parse.quote_plus("нет данных с " str(sen['description']) + "(" + str(timeshrimp) + " секунд")
-            urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
-        timeshrimp = time.time() - sen['timestamp']
-        print(timeshrimp)
+            msg = urllib.parse.quote_plus("Нет данных с '" + str(sen['description']) + "' на Arduino")
+            tg(msg)
         if timeshrimp >= 30:
-            msg = urllib.parse.quote_plus(str(sen['description']) + " не присылает данных " + str(timeshrimp) + " секунд")
-            urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={msg}")
+            msg = urllib.parse.quote_plus("'" + str(sen['description']) + "' не присылает данных " + str(int(timeshrimp)) + " секунд")
+            tg(msg)
+            nocon = True
+        if nocon == True and timeshrimp < 30:
+            nocon = False
+            msg = urllib.parse.quote_plus("Связь с устройством восстановлена")
+            tg(msg)
+
+
 
 
 
