@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\versh\Documents\GitHub\alyarma\api
+set VIRTUAL_ENV=C:\Users\yu\Documents\GitHub\alyarma\api
 
 if not defined PROMPT set PROMPT=$P$G
 
