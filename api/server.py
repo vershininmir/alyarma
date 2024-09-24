@@ -12,14 +12,14 @@ def tg(tgmsg):
 lsensors = [
     {
         'id': 1,
-        'description': u'это будет датчика дыма',
+        'description': u'Датчик дыма',
         'val': -1,
         'alarm': -1,
         'timestamp': time.time()
     },
     {
         'id': 2,
-        'description': u'это будет ик сенсор огня',
+        'description': u'ИК датчик огня',
         'val': -1,
         'alarm': -1,
         'timestamp': time.time()
@@ -102,10 +102,11 @@ def task():
             msg = urllib.parse.quote_plus("'" + str(sen['description']) + "' не присылает данных " + str(int(timeshrimp)) + " секунд")
             tg(msg)
             nocon = True
-        if nocon == True and timeshrimp < 30:
-            nocon = False
-            msg = urllib.parse.quote_plus("Связь с устройством восстановлена")
-            tg(msg)
+        if nocon == True:
+            if timeshrimp < 30:
+                nocon = False
+                msg = urllib.parse.quote_plus("Связь с '" + str(sen['description']) + "' восстановлена")
+                tg(msg)
 
 
 
