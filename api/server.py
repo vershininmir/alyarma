@@ -1,14 +1,19 @@
-from flask import Flask, jsonify, abort, make_response, request
-import time
-from apscheduler.schedulers.background import BackgroundScheduler
-import urllib
-import json
-app = Flask(__name__)
-scheduler = BackgroundScheduler()
+from flask import Flask, jsonify, abort, make_response, request # импортируем модулей из библиотеки flask
+import time # импорт библиотеки работы со временем
+from apscheduler.schedulers.background import BackgroundScheduler # импортируем библиотеку для запуска паралельных задач
+import urllib # импорт библиотеки подключения к интернет ресурсам
+import json  # импорт библиотеки для работы с json
+app = Flask(__name__)  # создание экземпляра обьекта flask
+scheduler = BackgroundScheduler() # создание экземпляра обьекта планировщика задач
 
-def tg(tgmsg):
-    urllib.request.urlopen(f"https://api.telegram.org/bot5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A/sendMessage?chat_id=115850485&text={tgmsg}")
+def tg(tgmsg): # создание функции отправки сообщений в tg
+    bot = '5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A' # id бота
+    chat_id = '115850485' # id чата с  пользователем
+    urllib.request.urlopen(f"https://api.telegram.org/bot{bot}/sendMessage?chat_id={chat_id}&text={tgmsg}")  # отправка в tg
 
+
+#  создание json структура в памяти для хранения информации с датчиков
+#  хранит номер, описание, значение, флаг тревоги и штамп времени отправки данных
 lsensors = [
     {
         'id': 1,
@@ -25,20 +30,23 @@ lsensors = [
         'timestamp': time.time()
     }
 ]
-#curl -i http://localhost:5000/alyarma/api/v1.0/sensors
+
+# создание основной url api сервера
+# пример для вызова из командной строки: curl -i http://localhost:5000/alyarma/api/v1.0/sensors
 @app.route('/alyarma/api/v1.0/sensors', methods=['GET'])
 def get_sensors():
-    return jsonify({'sensors': lsensors})
+    return jsonify({'sensors': lsensors})  # возвращаем информацию о всех датчиках
 
+# создание url каждого датчика для api сервера
 @app.route('/alyarma/api/v1.0/sensors/<int:sensor_id>', methods=['GET'])
 def get_senor(sensor_id):
-    sensor = list(filter(lambda s: s['id'] == sensor_id, lsensors))
+    sensor = list(filter(lambda s: s['id'] == sensor_id, lsensors)) # ищем по lsensors элемент с таким же id как в url
     if len(sensor) == 0:
         abort(404)
-    return jsonify({'sensor': sensor[0]})
+    return jsonify({'sensor': sensor[0]}) # возвращаем информацию о датчика c таким же id как в url
 
-#curl -i -H "Content-Type: application/json" -X POST -d "{"""description""":"""DATCHANIN3""","""alarm""":"""-1"""}" http://localhost:5000/alyarma/api/v1.0/sensors
-
+# создание url для создания нового элемента в json
+# curl -i -H "Content-Type: application/json" -X POST -d "{"""description""":"""датчик №3""","""alarm""":"""-1"""}" http://localhost:5000/alyarma/api/v1.0/sensors
 @app.route('/alyarma/api/v1.0/sensors', methods=['POST'])
 def create_sensor():
     if not request.json or not 'alarm' in request.json:
@@ -53,8 +61,8 @@ def create_sensor():
     lsensors.append(sensor)
     return jsonify({'sensor': sensor}), 201
 
+# создание url для обновления информации на части элемента
 # curl -i -H "Content-Type: application/json" -X PUT -d "{"""val""":2}" http://localhost:5000/alyarma/api/v1.0/sensors/2
-
 @app.route('/alyarma/api/v1.0/sensors/<int:sensor_id>', methods=['PUT'])
 def update_sensor(sensor_id):
     sensor = list(filter(lambda t: t['id'] == sensor_id, lsensors))

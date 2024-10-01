@@ -79,7 +79,7 @@ void checkFlame() { // функция считывания данных с да�
 }
 void sendSmoke() {  // функция отправки данных на api сервер с датчика дыма
   static uint32_t tmr1;   // переменная таймера
-  if (millis() - tmr1 >= PERIOD_SEND) {  // ищем разницу
+  if (millis() - tmr1 >= PERIOD_SEND) {  // ищем разницу между текущем временем и временем, записанным в переменную таймер, если эта разница больше периода отпраки, то отправляем данные с датчика
     tmr1 = millis();                   // сброс таймера
     if(WiFi.status()== WL_CONNECTED) { // проверяем подключение к WiFi
       WiFiClient client; // инициализируем подключение к API-серверу
@@ -104,58 +104,45 @@ void sendSmoke() {  // функция отправки данных на api с�
       if (httpResponseCode != 200) {  // если не получен положительный ответ от сервера, то сигнализируем об ошибке
         Serial.println("Server error"); // здесь будет отпрака сигнала с gsm
       }
-      
-
-      // Free resources
-      http.end();
+      http.end(); // завершить передачу HTTP
     }
     else {
-      Serial.println("WiFi Disconnected");
+      Serial.println("WiFi Disconnected"); // сообщить о недоступности WiFi
     }
   }
 }
 
 
-void sendFlame() {
+void sendFlame() { // функция отправки данных на api сервер с датчика огня
   static uint32_t tmr1;   // переменная таймера
-  static char buff[20];
-  if (millis() - tmr1 >= PERIOD_SEND) {  // ищем разницу
+  if (millis() - tmr1 >= PERIOD_SEND) {  // // ищем разницу между текущем временем и временем, записанным в переменную таймер, если эта разница больше периода отпраки, то отправляем данные с датчика
     tmr1 = millis();                   // сброс таймера
-    if(WiFi.status()== WL_CONNECTED){
-      WiFiClient client;
-      HTTPClient http;
-      static String sensorPath = server_name + num_flame;
-      // Your Domain name with URL path or IP address with path
-      http.begin(client, sensorPath);
-      static char char_value[20];
-      sprintf(char_value, "%d", value_flame);
+    if(WiFi.status()== WL_CONNECTED){ // проверяем подключение к WiFi
+      WiFiClient client;  // инициализируем подключение к API-серверу
+      HTTPClient http;  // инициализируем отправку данных по HTTP
+      static String sensorPath = server_name + num_flame;  // объеденяем название сервера и номер датчика
+      http.begin(client, sensorPath);  // начинаем передачу данных
+      static char char_value[20]; // переменная для преобразования типа данных
+      sprintf(char_value, "%d", value_flame); // преобразуем типы данных
 
-      static char char_alarm[20];
-      sprintf(char_alarm, "%d", alarm_flame);
-      static String str1 = "{\"val\":";
-      static String str2 = ",\"alarm\":";
-      static String str3 = "}";
+      static char char_alarm[20];  // переменная для преобразования типа данных
+      sprintf(char_alarm, "%d", alarm_flame); // преобразуем типы данных
+      static String str1 = "{\"val\":"; // вспомогательная переменная
+      static String str2 = ",\"alarm\":"; // вспомогательная переменная
+      static String str3 = "}"; // вспомогательная переменная
 
-      // If you need an HTTP request with a content type: application/json, use the following:
-      json_string_flame = str1 + char_value + str2 + char_alarm + str3;
-      http.addHeader("Content-Type", "application/json");
-      int httpResponseCode = http.PUT(json_string_flame);
+      json_string_flame = str1 + char_value + str2 + char_alarm + str3; // строка, отправляемая как json на HTTP-сервер, с данными с датчика огня
+      http.addHeader("Content-Type", "application/json"); // формирование HTTP пакета
+      int httpResponseCode = http.PUT(json_string_flame); // отправка HTTP пакета
      
-      //Serial.print("HTTP Response code: ");
-      //Serial.println(httpResponseCode);
       if (httpResponseCode != 200) {
-        Serial.println("Server error");
+        Serial.println("Server error"); // если не получен положительный ответ от сервера, то сигнализируем об ошибке
       }
-      Serial.println(value_flame);
-      Serial.println(alarm_flame);
-      Serial.println(char_value);
-      Serial.println(char_alarm);
-      Serial.println(json_string_flame);
-      // Free resources
-      http.end();
+
+      http.end(); // завершить передачу HTTP
     }
     else {
-      Serial.println("WiFi Disconnected");
+      Serial.println("WiFi Disconnected");  // сообщить о недоступности WiFi
     }
   }
 }
