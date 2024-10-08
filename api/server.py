@@ -8,8 +8,11 @@ scheduler = BackgroundScheduler() # создание экземпляра обь
 
 def tg(tgmsg): # создание функции отправки сообщений в tg
     bot = '5348701174:AAEfRST-YfqqY5BkkqEZlt9RWVloyd-tt1A' # id бота
-    chat_id = '115850485' # id чата с  пользователем
+    chat_id = '-1002165209275' # id чата с  пользователем
     urllib.request.urlopen(f"https://api.telegram.org/bot{bot}/sendMessage?chat_id={chat_id}&text={tgmsg}")  # отправка в tg
+
+msg = urllib.parse.quote_plus("Начало работы")
+tg(msg)
 
 
 #  создание json структура в памяти для хранения информации с датчиков

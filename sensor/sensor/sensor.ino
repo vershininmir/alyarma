@@ -12,19 +12,23 @@ int alarm_smoke = -1; // состояние датчика дыма
 int alarm_flame = -1; // состояние датчика огня
 int pin_smoke = A0;   // номер пина датчика дыма
 int pin_flame = D1;   // номер пина датчика огня
+int pin_buzz = D0;     // номер пина пьезоэлемента для звука
 int value_smoke = 0;  // значение датчика дыма
 int value_flame = 0;  // значение датчика огня
+int buzz = 0;
+int buzzflame = 0;
 String json_string_smoke;  // строка, отправляемая как json на HTTP-сервер, с данными с датчика дыма
 String json_string_flame;  // строка, отправляемая как json на HTTP-сервер, с данными с датчика огня
 const String num_smoke = "1"; // номер датчика дыма в api сервере
 const String num_flame = "2"; // номер датчика огня в api сервере
-const String server_name = "http://192.168.0.111:5000/alyarma/api/v1.0/sensors/"; // строка подключения к API-серверу
+const String server_name = "http://192.168.0.103:5000/alyarma/api/v1.0/sensors/"; // строка подключения к API-серверу
 
 // инициализация
 void setup() { 
   Serial.begin(112500); // подключение вывода данных с esp8266 в консоль
   Serial.println("Init start");  // вывод информации о начале инициализации программы в консоль
   pinMode(pin_flame, INPUT);  // изменение типа работы входа сигнала с датчика огня
+  pinMode(pin_buzz, OUTPUT);
   WiFi.begin(WIFI_SSID, WIFI_PASS); // подключение к сети WiFi
   while (WiFi.status() != WL_CONNECTED) { // ждем подключения к WiFi
     delay(500);
@@ -41,7 +45,25 @@ void loop() {
   checkFlame();
   sendSmoke();
   sendFlame();
-  
+  if (buzz == 1){
+    digitalWrite(pin_buzz, 0);
+    delay(1);
+    digitalWrite(pin_buzz, 1);
+  }
+  else if (buzz == 0) {
+    digitalWrite(pin_buzz, 0);
+  }
+
+  if (buzzflame == 1){
+    digitalWrite(pin_buzz, 0);
+    delay(1);
+    digitalWrite(pin_buzz, 1);
+  }
+  else if (buzz == 0) {
+    digitalWrite(pin_buzz, 0);
+  }
+  Serial.println(value_smoke);
+  Serial.println(buzz);
 }
 
 void checkSmoke() { // функция считывания данных с датчика дыма
@@ -51,12 +73,15 @@ void checkSmoke() { // функция считывания данных с да�
     value_smoke = analogRead(pin_smoke); // считываем данные с датчика дыма
     if (value_smoke >= smoke_threshold) { // сравниваем данные с датчиком и значением порога срабатывания, и если данные с датчика больше, то устанавливается флаг о тревоге 
       alarm_smoke = 1; // устанавливается флаг о тревоге 
+      buzz = 1;
+
     }
     else if (value_smoke <= 10) { // если значение меньше 10, значит, что датчик не работает
       alarm_smoke = 0; // устанавливается флаг о отсутствии данных с датчика
     }
     else { // в других случаях датчик работает нормально 
       alarm_smoke = -1;
+      buzz = 0;
     }
   }
 }
@@ -68,9 +93,11 @@ void checkFlame() { // функция считывания данных с да�
     value_flame = digitalRead(pin_flame); // считываем данные с датчика огня
     if (value_flame == 0) { // сравниваем данные с датчиком и значением порога срабатывания, и если данные с датчика больше, то устанавливается флаг о тревоге 
       alarm_flame = 1; // устанавливается флаг о тревоге
+      buzzflame = 1;
     }
     else if (value_flame == 1) { // датчик работает нормально
       alarm_flame = -1;
+      buzzflame = 0;
     }
     else { // в других случаях датчик работает неправильно
       alarm_flame = 0;
